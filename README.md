@@ -7,6 +7,7 @@ Numpy integration
 C++ Templating for composable kernels with generic data types 
 
 Originally based on https://github.com/torstem/demo-cuda-pybind11
+Template generated from https://github.com/PWhiddy/pybind11-cuda
 
 # Prerequisites
 
@@ -22,4 +23,3 @@ Cmake 3.6 or greater
 
 Test it with 
 ```python3 test_linsys_solve.py``` 
- 

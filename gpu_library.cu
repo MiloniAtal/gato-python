@@ -23,7 +23,7 @@
 
 #include "/home/a2rlab/ppcg/TrajoptReference_Dev/read_csv_into_cpp.h"
 
-
+namespace py = pybind11;
 int gato_linsys(int *d_G_row, int *d_G_col, float *d_G_val,
                 int *d_C_row, int *d_C_col, float *d_C_val,
                 float *d_g_val,
@@ -84,7 +84,7 @@ int gato_linsys(int *d_G_row, int *d_G_col, float *d_G_val,
     return pcg_iters;
 }
 
-int main_call(std::vector<int> sG_indptr_vector, std::vector<int> sG_indices_vector, std::vector<float> sG_data_vector, 
+py::tuple main_call(std::vector<int> sG_indptr_vector, std::vector<int> sG_indices_vector, std::vector<float> sG_data_vector, 
                 std::vector<int> sC_indptr_vector, std::vector<int> sC_indices_vector, std::vector<float> sC_data_vector, 
                 std::vector<float> g_vector, std::vector<float> c_vector){
 
@@ -176,7 +176,7 @@ int main_call(std::vector<int> sG_indptr_vector, std::vector<int> sG_indices_vec
     float e1;
     cudaEventElapsedTime(&e1, start, stop);
 
-    printf("PCG terminated in %d iterations, time:  %f\nlambda\n", iters, e1);
+    printf("PCG terminated in %d iterations, time:  %f\n", iters, e1);
     // for(int i =0; i < STATE_SIZE*KNOT_POINTS; i++)
     //      printf("%f\n", lambda[i]);
     // printf("\n\ndz\n");
@@ -197,10 +197,22 @@ int main_call(std::vector<int> sG_indptr_vector, std::vector<int> sG_indices_vec
     gpuErrchk( cudaFree(d_c_val));
     
     
-	return 0;
+	py::list p_lambda;
+    for(int i=0;i<=STATE_SIZE*KNOT_POINTS;i++){
+        p_lambda.append(lambda[i]);
+    }
+    py::list p_dz;
+    for(int i=0;i<=(STATES_S_CONTROLS)*KNOT_POINTS-CONTROL_SIZE;i++){
+        p_dz.append(dz[i]);
+    }
+
+    py::tuple ans = py::make_tuple(p_lambda, p_dz);
+    return ans;
+
+    
 }
 
 PYBIND11_MODULE(gpu_library, m)
 {
-  m.def("linsys_solve", &main_call);
+  m.def("linsys_solve", &main_call, py::return_value_policy::move);
 }

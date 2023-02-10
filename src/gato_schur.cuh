@@ -473,7 +473,6 @@ void gato_form_schur_jacobi(float *d_G,
                                     7 * STATE_SIZE+ 
                                     STATE_SIZE * CONTROL_SIZE+
                                      3 * CONTROL_SIZE + 2 * CONTROL_SIZE* CONTROL_SIZE + 3;
-                                /// TODO: determine actual shared mem size needed
     
     __shared__ float s_temp[ s_temp_size ];
 
@@ -893,13 +892,25 @@ void form_schur(int *d_G_row, int *d_G_col, float *d_G_val, float *d_G_dense,
 
     dim3 launch_block(((max(STATES_SQ, CONTROLS_SQ) / 32) + 1)*32);
     dim3 launch_grid(KNOT_POINTS);
-    
 
+    int gridsize, blocksize;
+    gpuErrchk(cudaOccupancyMaxPotentialBlockSize<void(*)(float *, float *, float *, float *, float *, float *, float *)>(&gridsize, &blocksize, gato_form_schur_jacobi, 0,0));
+
+    printf("launching kkt with %d blocks and %d threads\n", KNOT_POINTS, blocksize);
+    
     // convert G, C, g into custom formats
     gato_convert_kkt_format<<<launch_grid, launch_block>>>(d_G_row,d_G_col,d_G_val,
                                                                d_C_row,d_C_col,d_C_val,
                                                                d_G_dense, d_C_dense, rho);
     gpuErrchk( cudaPeekAtLastError() );
+
+#if GATO_TIMING
+    cudaDeviceSynchronize();
+    cudaEvent_t schur_start, schur_stop;    
+    cudaEventCreate(&schur_start);
+    cudaEventCreate(&schur_stop);
+    cudaEventRecord(schur_start);
+#endif /* GATO_TIMING */
 
 #if GATO_PRINTING
 
@@ -928,10 +939,12 @@ void form_schur(int *d_G_row, int *d_G_col, float *d_G_val, float *d_G_dense,
 #endif /* GATO_PRINTING */
     
     // form Schur, Jacobi
-    gato_form_schur_jacobi<<<launch_grid, launch_block>>>(d_G_dense, d_C_dense, d_g_val, d_c_val, d_S, d_Pinv, d_gamma);
+    gato_form_schur_jacobi<<<KNOT_POINTS, blocksize>>>(d_G_dense, d_C_dense, d_g_val, d_c_val, d_S, d_Pinv, d_gamma);
     gpuErrchk( cudaPeekAtLastError() );
 
-#if GATO_PRINTING
+#if DEBUG_MODE
+    gpuErrchk( cudaDeviceSynchronize() );
+    gpuErrchk( cudaPeekAtLastError() );
     
     float G_dense_copy[KKT_G_DENSE_SIZE_BYTES];
     memset((void *)G_dense_copy, 0, KKT_G_DENSE_SIZE_BYTES);
@@ -946,7 +959,7 @@ void form_schur(int *d_G_row, int *d_G_col, float *d_G_val, float *d_G_dense,
         std::cout << G_dense_copy[i] << " ";
     }
     std::cout << std::endl;
-#endif /* GATO_PRINTING */
+#endif /* DEBUG_MODE */
 
 
 #if SS_PRECON
@@ -955,6 +968,19 @@ void form_schur(int *d_G_row, int *d_G_col, float *d_G_val, float *d_G_dense,
     gpuErrchk( cudaPeekAtLastError() );
 
 #endif  /* #if SS_PRECONDITIONER */
+
+#if GATO_TIMING
+    cudaDeviceSynchronize();
+    cudaEventRecord(schur_stop);
+    cudaEventSynchronize(schur_start);
+    cudaEventSynchronize(schur_stop);
+
+    float e1;
+    cudaEventElapsedTime(&e1, schur_start, schur_stop);
+
+    printf("Forming Schur took:  %f ms\n", e1);
+#endif /* GATO_TIMING */
+
 
 #if GATO_PRINTING
 
@@ -989,8 +1015,6 @@ void compute_dz(float *d_G_dense, float *d_C_dense, float *d_g_val, float *d_lam
     dim3 launch_grid(KNOT_POINTS);
 
     gato_compute_dz<<<launch_grid, launch_block>>>(d_G_dense, d_C_dense, d_g_val, d_lambda, d_dz);
-    gpuErrchk( cudaDeviceSynchronize());
-    gpuErrchk( cudaPeekAtLastError() );
 
 #if DEBUG_MODE
     gpuErrchk( cudaDeviceSynchronize());

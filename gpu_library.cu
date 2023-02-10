@@ -21,8 +21,6 @@
 #include <pybind11/stl.h>
 #include <cuda_runtime.h>
 
-#include "/home/a2rlab/ppcg/TrajoptReference_Dev/read_csv_into_cpp.h"
-
 namespace py = pybind11;
 int gato_linsys(int *d_G_row, int *d_G_col, float *d_G_val,
                 int *d_C_row, int *d_C_col, float *d_C_val,
@@ -43,8 +41,9 @@ int gato_linsys(int *d_G_row, int *d_G_col, float *d_G_val,
     cuda_malloc((void **)&d_S,     3*STATES_SQ*KNOT_POINTS*sizeof(float));
     cuda_malloc((void **)&d_Pinv,  3*STATES_SQ*KNOT_POINTS*sizeof(float));
     cuda_malloc((void **)&d_gamma, STATE_SIZE*KNOT_POINTS*sizeof(float));
-    cuda_calloc((void **)&d_lambda, STATE_SIZE*KNOT_POINTS*sizeof(float));
     cuda_malloc((void **)&d_dz, ((STATES_S_CONTROLS)*KNOT_POINTS-CONTROL_SIZE)*sizeof(float));
+
+    cuda_calloc((void **)&d_lambda, STATE_SIZE*KNOT_POINTS*sizeof(float));
     if(warm_start)
         gpuErrchk( cudaMemcpy(d_lambda, lambda, STATE_SIZE*KNOT_POINTS*sizeof(float), cudaMemcpyHostToDevice));
 
@@ -129,7 +128,6 @@ py::tuple main_call(std::vector<int> sG_indptr_vector, std::vector<int> sG_indic
 */
 #endif  /* #if DEBUG_MODE */
 
-    float lambda[STATE_SIZE*KNOT_POINTS];
     float dz[(STATES_S_CONTROLS)*KNOT_POINTS-CONTROL_SIZE];
 
 
@@ -155,28 +153,48 @@ py::tuple main_call(std::vector<int> sG_indptr_vector, std::vector<int> sG_indic
     gpuErrchk( cudaMemcpy(d_g_val, g_val, g_size_bytes, cudaMemcpyHostToDevice));
     gpuErrchk( cudaMemcpy(d_c_val, c_val, c_size_bytes, cudaMemcpyHostToDevice));
 
+    // @Miloni inputs to add
+    int testiters = 10;
+    float exit_tol = 1e-6;
+    int max_iters = 150;
+    float lambda[STATE_SIZE*KNOT_POINTS];
+    bool warm_start = false;
+
+    float times[testiters];
     cudaEvent_t start, stop;    
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
-    cudaEventRecord(start);
 
-    int iters = gato_linsys(d_G_row, d_G_col, d_G_val,
-                            d_C_row, d_C_col, d_C_val,
-                            d_g_val,
-                            d_c_val,
-                            lambda, dz,
-                            false, 1e-6, 100);
+    for(int i = 0; i < testiters; i++){
+        cudaEventCreate(&start);
+        cudaEventCreate(&stop);
+        cudaEventRecord(start);
+
+        int iters = gato_linsys(d_G_row, d_G_col, d_G_val,
+                                d_C_row, d_C_col, d_C_val,
+                                d_g_val,
+                                d_c_val,
+                                lambda, dz,
+                                warm_start, exit_tol, max_iters);
+
+        cudaEventRecord(stop);
+        cudaEventSynchronize(start);
+        cudaEventSynchronize(stop);
+        
+        float e1;
+        cudaEventElapsedTime(&e1, start, stop);
+        times[i] = e1;
+
+        if(i==0){
+            printf("first run PCG terminated in %d iterations, time:  %f\n", iters, e1);
+        }
+    }
+
+    for(int i = 1; i < testiters; i++){
+        times[0] += times[i];
+    }
+
+    printf("avg time: %f\n", times[0]/testiters);
+
     
-    cudaDeviceSynchronize();
-
-    cudaEventRecord(stop);
-    cudaEventSynchronize(start);
-    cudaEventSynchronize(stop);
-    
-    float e1;
-    cudaEventElapsedTime(&e1, start, stop);
-
-    printf("PCG terminated in %d iterations, time:  %f\n", iters, e1);
     // for(int i =0; i < STATE_SIZE*KNOT_POINTS; i++)
     //      printf("%f\n", lambda[i]);
     // printf("\n\ndz\n");

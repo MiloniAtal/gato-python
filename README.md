@@ -23,6 +23,18 @@ Test it with
 ```python3 test_linsys_solve.py```
 
 # Example
+
+Make sure you set the following variable according to the problem in "include/gato_defines.h"
+```
+#define STATE_SIZE   2
+#define CONTROL_SIZE 1
+#define KNOT_POINTS 5
+```
+And, then run the build command
+```source install.bash``` 
+
+
+Then the example can be run:
 ```
 import gpu_library
 import numpy as np

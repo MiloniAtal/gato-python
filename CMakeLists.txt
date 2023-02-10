@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.6)
-find_package(CUDA REQUIRED)
+enable_language(CUDA)
 find_package(PythonInterp 3.6 REQUIRED)
 find_package(PythonLibs 3.6 REQUIRED)
+include(CheckLanguage)
+check_language(CUDA)
 
 include_directories(
     ${PYTHON_INCLUDE_DIRS}
@@ -14,7 +16,7 @@ link_directories(
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-cuda_add_library(gpu_library SHARED
+add_library(gpu_library SHARED
   gpu_library.cu)
 
 target_link_libraries(gpu_library

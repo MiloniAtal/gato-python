@@ -85,8 +85,9 @@ int gato_linsys(int *d_G_row, int *d_G_col, float *d_G_val,
 
 py::tuple main_call(std::vector<int> sG_indptr_vector, std::vector<int> sG_indices_vector, std::vector<float> sG_data_vector, 
                 std::vector<int> sC_indptr_vector, std::vector<int> sC_indices_vector, std::vector<float> sC_data_vector, 
-                std::vector<float> g_vector, std::vector<float> c_vector){
-
+                std::vector<float> g_vector, std::vector<float> c_vector, std::vector<float> input_lambda, int testiters, float exit_tol, int max_iters, bool warm_start){
+    
+    
     int* G_row = sG_indptr_vector.data();
     int G_row_size_bytes = sG_indptr_vector.size() * sizeof(int);
     
@@ -153,12 +154,12 @@ py::tuple main_call(std::vector<int> sG_indptr_vector, std::vector<int> sG_indic
     gpuErrchk( cudaMemcpy(d_g_val, g_val, g_size_bytes, cudaMemcpyHostToDevice));
     gpuErrchk( cudaMemcpy(d_c_val, c_val, c_size_bytes, cudaMemcpyHostToDevice));
 
-    // @Miloni inputs to add
-    int testiters = 10;
-    float exit_tol = 1e-6;
-    int max_iters = 150;
+
+
     float lambda[STATE_SIZE*KNOT_POINTS];
-    bool warm_start = false;
+    for(int i=0;i<STATE_SIZE*KNOT_POINTS;i++){
+        lambda[i] = input_lambda[i];
+    }
 
     float times[testiters];
     cudaEvent_t start, stop;    

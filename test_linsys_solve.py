@@ -12,8 +12,12 @@ C_val = [ 1.   ,  1.   , -1.   , -0.1  ,  1.   ,  0.981, -1.   , -0.1  ,  1.   ,
 
 g_val = [  -3.1416,   0.    ,   0.    ,  -3.1416,   0.    ,   0.    ,  -3.1416,   0.    ,   0.    ,  -3.1416,   0.    ,   0.    , -314.159 ,   0.]
 c_val = [0,0,0,0,0,0,0,0,0,0]
-
-l, dz = gpu_library.linsys_solve(G_row, G_col, G_val, C_row, C_col, C_val, g_val, c_val)
+testiters = 10
+exit_tol = 1e-6
+max_iters = 10
+warm_start = False
+input_lambda = [0.,0.,0.,0.,0.,0.,0.,0.,0., 0., 0.]
+l, dz = gpu_library.linsys_solve(G_row, G_col, G_val, C_row, C_col, C_val, g_val, c_val, input_lambda, testiters, exit_tol, max_iters, warm_start)
 print("Lambda:")
 print(l)
 print("dz")

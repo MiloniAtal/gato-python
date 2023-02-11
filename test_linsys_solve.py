@@ -1,6 +1,7 @@
 import gpu_library
 import numpy as np
 import time
+from scipy import sparse
 
 G_row =  [0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14]
 G_col = [0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13]
@@ -18,7 +19,15 @@ max_iters = 10
 warm_start = False
 input_lambda = [0.,0.,0.,0.,0.,0.,0.,0.,0., 0., 0.]
 l, dz = gpu_library.linsys_solve(G_row, G_col, G_val, C_row, C_col, C_val, g_val, c_val, input_lambda, testiters, exit_tol, max_iters, warm_start)
-print("Lambda:")
-print(l)
-print("dz")
-print(dz)
+
+
+G_csr = sparse.csr_matrix((G_val, G_col, G_row))
+C_csr = sparse.csr_matrix((C_val, C_col, C_row))
+G = G_csr.todense()
+C = C_csr.todense()
+A = np.block([[G, C.T], [C, np.zeros((C.shape[0], C.shape[0]))]])
+gamma = np.block([[np.array([g_val]).T],[ np.array([c_val]).T]])
+x = (np.linalg.inv(A).dot(gamma))
+x_gato = np.block([[np.array([dz]).T],[ np.array([l]).T]])
+
+assert(np.allclose(x_gato, x , rtol=1,atol=0.01))

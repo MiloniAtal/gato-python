@@ -217,11 +217,11 @@ py::tuple main_call(std::vector<int> sG_indptr_vector, std::vector<int> sG_indic
     
     
 	py::list p_lambda;
-    for(int i=0;i<=STATE_SIZE*KNOT_POINTS;i++){
+    for(int i=0;i<STATE_SIZE*KNOT_POINTS;i++){
         p_lambda.append(lambda[i]);
     }
     py::list p_dz;
-    for(int i=0;i<=(STATES_S_CONTROLS)*KNOT_POINTS-CONTROL_SIZE;i++){
+    for(int i=0;i<(STATES_S_CONTROLS)*KNOT_POINTS-CONTROL_SIZE;i++){
         p_dz.append(dz[i]);
     }
 

@@ -6,9 +6,6 @@
 
 
 /* these must be set for compile */
-#define STATE_SIZE   2
-#define CONTROL_SIZE 1
-#define KNOT_POINTS 5
 #define BLOCK_J_PRECON  1
 #define SS_PRECON       1
 #define PRECONDITIONER_BANDWIDTH 3

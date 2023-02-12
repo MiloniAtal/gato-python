@@ -1,0 +1,3 @@
+#!/bin/bash
+source install.bash 2 1 5
+python test_pendulum_5.py

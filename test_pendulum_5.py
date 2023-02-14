@@ -1,8 +1,11 @@
+import subprocess
 import gpu_library
 import numpy as np
 import time
 from scipy import sparse
-
+print("")
+print("------------------LINSYS OUTPUT----------------------------------")
+print("")
 G_row =  [0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14]
 G_col = [0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13]
 G_val = [ 1. ,   1. ,   0.1,   1. ,   1. ,   0.1,   1. ,   1. ,   0.1,   1. ,   1. ,   0.1, 100., 100.]
@@ -17,7 +20,7 @@ testiters = 10
 exit_tol = 1e-6
 max_iters = 10
 warm_start = False
-input_lambda = [0.,0.,0.,0.,0.,0.,0.,0.,0., 0., 0.]
+input_lambda = [0.,0.,0.,0.,0.,0.,0.,0.,0., 0.]
 l, dz = gpu_library.linsys_solve(G_row, G_col, G_val, C_row, C_col, C_val, g_val, c_val, input_lambda, testiters, exit_tol, max_iters, warm_start)
 
 
@@ -31,3 +34,6 @@ x = (np.linalg.inv(A).dot(gamma))
 x_gato = np.block([[np.array([dz]).T],[ np.array([l]).T]])
 
 assert(np.allclose(x_gato, x , rtol=1,atol=0.01))
+print("")
+print("-----------------------------------------------------------------")
+print("Test passed")

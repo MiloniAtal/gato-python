@@ -24,15 +24,15 @@ Test it with
 
 # Example
 
-Make sure you set the following variable according to the problem in "include/gato_defines.h"
+Make sure you set the following variable according to the problem in when calling the build command. If you donot specify these numbers, the below default values will be used
 ```
-#define STATE_SIZE   2
-#define CONTROL_SIZE 1
-#define KNOT_POINTS 5
+STATE_SIZE  = 14
+CONTROL_SIZE = 7
+KNOT_POINTS = 50
 ```
-And, then run the build command
-```source install.bash``` 
 
+The build command would look like this for the below test case of Pendulum with 5 Knotpoints:
+```source install.bash 2 1 5``` 
 
 Then the example can be run:
 ```
@@ -54,6 +54,6 @@ testiters = 10
 exit_tol = 1e-6
 max_iters = 10
 warm_start = False
-input_lambda = [0.,0.,0.,0.,0.,0.,0.,0.,0., 0., 0.]
+input_lambda = [0.,0.,0.,0.,0.,0.,0.,0.,0., 0.]
 l, dz = gpu_library.linsys_solve(G_row, G_col, G_val, C_row, C_col, C_val, g_val, c_val, input_lambda, testiters, exit_tol, max_iters, warm_start)
 ```

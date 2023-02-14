@@ -141,7 +141,7 @@ void gato_form_schur_jacobi_inner(float *d_G, float *d_C, float *d_g, float *d_c
 
 
         // save -Q0^{-1}q0 in spot 0 in gamma
-        for(unsigned ind = GATO_THREAD_ID; ind < STATES_SQ; ind += GATO_THREADS_PER_BLOCK){
+        for(unsigned ind = GATO_THREAD_ID; ind < STATE_SIZE; ind += GATO_THREADS_PER_BLOCK){
             d_gamma[ind] = -s_Q0[ind];
         }
         __syncthreads();//----------------------------------------------------------------

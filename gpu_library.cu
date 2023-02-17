@@ -27,11 +27,10 @@ int gato_linsys(int *d_G_row, int *d_G_col, float *d_G_val,
                 float *d_g_val,
                 float *d_c_val,
                 float *lambda, float *dz,
-                bool warm_start, float eps, int max_iter){
+                bool warm_start, float eps, int max_iter, float rho){
 
     float *d_S, *d_Pinv, *d_gamma, *d_lambda, *d_dz;
     int pcg_iters;
-    float rho = .001;
 
     float *d_G_dense, *d_C_dense;
     cuda_calloc((void **)&d_G_dense, KKT_G_DENSE_SIZE_BYTES);
@@ -85,7 +84,7 @@ int gato_linsys(int *d_G_row, int *d_G_col, float *d_G_val,
 
 py::tuple main_call(std::vector<int> sG_indptr_vector, std::vector<int> sG_indices_vector, std::vector<float> sG_data_vector, 
                 std::vector<int> sC_indptr_vector, std::vector<int> sC_indices_vector, std::vector<float> sC_data_vector, 
-                std::vector<float> g_vector, std::vector<float> c_vector, std::vector<float> input_lambda, int testiters, float exit_tol, int max_iters, bool warm_start){
+                std::vector<float> g_vector, std::vector<float> c_vector, std::vector<float> input_lambda, int testiters, float exit_tol, int max_iters, bool warm_start, float rho){
     
     
     int* G_row = sG_indptr_vector.data();
@@ -177,7 +176,7 @@ py::tuple main_call(std::vector<int> sG_indptr_vector, std::vector<int> sG_indic
                                 d_g_val,
                                 d_c_val,
                                 lambda, dz,
-                                warm_start, exit_tol, max_iters);
+                                warm_start, exit_tol, max_iters, rho);
 
         cudaEventRecord(stop);
         cudaEventSynchronize(start);

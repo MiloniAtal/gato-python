@@ -17,19 +17,16 @@ Cmake 3.6 or greater
 
 # To build 
 
-```source install.bash``` 
+```source install.bash [STATE_SIZE] [CONTROL_SIZE] [KNOT_POINTS]``` 
 
-Test it with 
-```python3 test_linsys_solve.py```
-
-# Example
-
-Make sure you set the following variable according to the problem in when calling the build command. If you donot specify these numbers, the below default values will be used
+Make sure to pass the variable according to the problem when calling the build command. If you donot specify these numbers, the below default values will be used
 ```
 STATE_SIZE  = 14
 CONTROL_SIZE = 7
 KNOT_POINTS = 50
 ```
+
+# Example
 
 The build command would look like this for the below test case of Pendulum with 5 Knotpoints:
 ```source install.bash 2 1 5``` 

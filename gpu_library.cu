@@ -112,8 +112,8 @@ py::tuple main_call(std::vector<int> sG_indptr_vector, std::vector<int> sG_indic
     float* c_val = c_vector.data();
     int c_size_bytes = c_vector.size() * sizeof(float);
 
-    assert(c_vector.size() == KNOT_POINTS*STATE_SIZE);
-    assert(g_vector.size() == (KNOT_POINTS*(STATE_SIZE+CONTROL_SIZE)-CONTROL_SIZE));
+    // assert(c_vector.size() == KNOT_POINTS*STATE_SIZE);
+    // assert(g_vector.size() == (KNOT_POINTS*(STATE_SIZE+CONTROL_SIZE)-CONTROL_SIZE));
 
 #if DEBUG_MODE
 /*

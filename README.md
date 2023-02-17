@@ -52,5 +52,7 @@ exit_tol = 1e-6
 max_iters = 10
 warm_start = False
 input_lambda = [0.,0.,0.,0.,0.,0.,0.,0.,0., 0.]
-l, dz = gpu_library.linsys_solve(G_row, G_col, G_val, C_row, C_col, C_val, g_val, c_val, input_lambda, testiters, exit_tol, max_iters, warm_start)
+rho = .001
+l, dz = gpu_library.linsys_solve(G_row, G_col, G_val, C_row, C_col, C_val, g_val, c_val, input_lambda, testiters, exit_tol, max_iters, warm_start, rho)
+
 ```

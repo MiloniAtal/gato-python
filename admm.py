@@ -2,8 +2,7 @@ import pcg
 import numpy as np
 import cvxpy as cp
 import gpu_library
-
-
+import subprocess
 #### Utility functions for setting up problems, testing against cvxpy
 
 # Class to store problem data representing the following problem
@@ -210,20 +209,14 @@ prob.u[0:nx, 0] = -A@x0
 # print(prob.nc)
 
 # x_sol = get_sol(prob)
-print("")
-print("------------------Python OUTPUT----------------------------------")
-print("")
 
-x, z, lamb = admm_solve(prob, debug=False, tol=1e-3, max_iter=100)
+
+xp, zp, lambp = admm_solve(prob, debug=False, tol=1e-3, max_iter=100)
 
 
 main_nx = prob.nx
 main_nc = prob.nc
 
-
-print(list(x.reshape(main_nx, )))
-print(list(lamb.reshape(main_nc, )))
-print(list(z.reshape(main_nc, )))
 
 
 g_H = list((prob.H.T).reshape(main_nx*main_nx, ))
@@ -240,11 +233,34 @@ sigma = 1e-6
 tol = 1e-3
 max_iter = 100
 
+
+
+# subprocess.call(["./../install.bash", 1, 1, 1, 1,1])
+# subprocess.check_call(["./../install.bash", str(int(main_nx/N)), str(int(main_nc/N)), str(N), str(main_nc), str(main_nx)], shell=True)
+# subprocess.check_call("./../install.bash %s %s %s %s %s" % (str(int(main_nx/N)), str(int(main_nc/N)), str(N), str(main_nc), str(main_nx)), shell=True)
+bash_script = 'install.bash'
+
+# Execute the 'source' command in a new shell session
+result = subprocess.run(f'source {bash_script} {int(main_nx/N)} {int(main_nc/N)} {N} {main_nc} {main_nx} ', shell=True, executable='/bin/bash')
+
+
+
+xg, lambg, zg = gpu_library.admm_solve(g_H, g_g, g_A, g_l, g_u, g_x, g_lamb, g_z, rho, sigma, tol, max_iter)
+
+print("")
+print("------------------Python OUTPUT----------------------------------")
+print("")
+
+
+print(list(xp.reshape(main_nx, )))
+print(list(lambp.reshape(main_nc, )))
+print(list(zp.reshape(main_nc, )))
+
+
 print("")
 print("------------------GPU OUTPUT----------------------------------")
 print("")
 
-x, lamb, z = gpu_library.admm_solve(g_H, g_g, g_A, g_l, g_u, g_x, g_lamb, g_z, rho, sigma, tol, max_iter)
-print(x)
-print(lamb)
-print(z)
+print(xg)
+print(lambg)
+print(zg)

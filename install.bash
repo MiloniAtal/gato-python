@@ -1,6 +1,17 @@
+
+# Print the script name
+echo "Script name: $0"
+
+# Print all arguments passed to the script using "$@"
+echo "All arguments using \$@:"
+for arg in "$@"; do
+    echo "$arg"
+done
+
 git submodule init
 git submodule update
 cd build
+
 if [ -z $1 ]; then
         echo "Using default values of STATE_SIZE, CONTROL_SIZE, KNOT_POINTS, NC, NX"
         cmake .. -DS=3 -DC=3 -DK=3 -DNC=9 -DNX=9

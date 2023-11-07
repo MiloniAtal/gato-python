@@ -17,7 +17,7 @@ link_directories(
     )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -DKNOT_POINTS=${K} -DSTATE_SIZE=${S} -DCONTROL_SIZE=${C} -lcublas")
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -DKNOT_POINTS=${K} -DSTATE_SIZE=${S} -DCONTROL_SIZE=${C} -DNX=${NX} -DNC=${NC} -lcublas")
 add_library(gpu_library SHARED
   gpu_library.cu)
 

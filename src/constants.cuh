@@ -3,8 +3,8 @@
 #endif
 
 #ifndef NX
-#define NX  9
+#define NX  15
 #endif
 #ifndef NC
-#define NC  9
+#define NC  15
 #endif

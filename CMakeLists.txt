@@ -8,6 +8,8 @@ check_language(CUDA)
 include_directories(
     ${PYTHON_INCLUDE_DIRS}
     ./pybind11/include
+	./GLASS
+	./GBD-PCG/include
     )
 
 link_directories(
@@ -15,12 +17,13 @@ link_directories(
     )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -DKNOT_POINTS=${K} -DSTATE_SIZE=${S} -DCONTROL_SIZE=${C}")
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -DKNOT_POINTS=${K} -DSTATE_SIZE=${S} -DCONTROL_SIZE=${C} -lcublas")
 add_library(gpu_library SHARED
   gpu_library.cu)
 
 target_link_libraries(gpu_library
   ${PYTHON_LIBRARIES}
-  cudart)
+  cudart
+  cublas)
 
 set_target_properties(gpu_library PROPERTIES PREFIX "")

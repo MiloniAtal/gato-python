@@ -17,7 +17,7 @@ Cmake 3.6 or greater
 
 # To build 
 
-```source install.bash [STATE_SIZE] [CONTROL_SIZE] [KNOT_POINTS]``` 
+```source install.bash [STATE_SIZE] [CONTROL_SIZE] [KNOT_POINTS] [NC] [NX]``` 
 
 Make sure to pass the variable according to the problem when calling the build command. If you donot specify these numbers, the below default values will be used
 ```
